@@ -1,0 +1,200 @@
+<!DOCTYPE html >
+<html>
+<head>
+  <title>Lab 3 SVG &D3</title>
+
+<script type = "text/javascript" src="https://d3js.org/d3.v6.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+
+ 
+</head>
+
+<body>
+    <div class="container">
+        <h2>
+            Population in European countries
+        </h2>
+        <div class="city-count"></div>
+        <div class="population-plot"></div>
+    </div>
+
+    <div class="container">
+        <h2>
+            World's Tallest Buildings
+        </h2>
+    
+
+    <div class="row">
+        <div class = "column">
+            <div class = "building-chart"></div>
+            <svg class = "building-chart"></svg>
+        </div>
+    
+
+        <div class="column">
+            <img class="image" />
+        </div>
+        <div class="column">
+            <h4 class="building-name"></h4>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Country</td>
+                        <td><span class="country"></span></td>
+                    </tr>
+                    <tr>
+                        <td>City</td>
+                        <td><span class="city"></span></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td><span class="heightft"></span> ft</td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td><span class="heightm"></span> m</td>
+                    </tr>
+                    <tr>
+                        <td>Floors</td>
+                        <td><span class="floors"></span></td>
+                    </tr>
+                    <tr>
+                        <td>Completed</td>
+                        <td><span class="completed"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var cities;
+        var eu_cites;
+        d3.csv('cities.csv', d3.autoType)
+            .then(data=>{
+                console.log('cities', data);
+                cities = data;
+                // cities = cities.filter(cities=>cities.eu == true)
+                cities = cities.filter(function(d){ return d.eu == true })
+                console.log(cities);
+
+            d3.select('.city-count').text(function(d){return "Number of European cities: "+ Object.keys(cities).length})
+
+        const width = 700;
+        const height = 550;
+        const svg = d3.select('.population-plot')
+		        .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+
+        svg.selectAll("dot")
+            .data(cities)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d){return d.x})
+            .attr("cy", function(d){return d.y}) 
+            .attr("r", function(d){
+                if (d.population > 1000000){
+                    return 8;
+                }
+                else{
+                    return 3;
+                }
+            })
+            .style("fill","cornflowerblue")
+        
+        svg.selectAll("text")
+            .data(cities)
+            .enter()
+            .append("text")
+            .attr("x", function(d){return d.x})
+            .attr("y", function(d){return d.y - 12}) 
+            .text(function(d){
+                if (d.population > 1000000){
+                    return d.country;
+                }
+                else{
+                    return;
+                }
+            })
+            .attr("text-anchor", "middle")
+            .attr("font-size", "11px")
+
+            })
+        
+    </script>
+
+    <script type = "text/javascript">
+        var buildings;
+        d3.csv('buildings.csv', d3.autoType)
+            .then(data =>{
+                console.log('buildings', data);
+                buildings = data;
+                buildings.sort(function(a,b){
+                    return a.height_m - b.height_m;
+                })
+                buildings = buildings.reverse()
+                console.log(buildings);
+
+        const width = 500;
+        const height = 500;
+        const svg = d3
+                .select('.building-chart')
+		        .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+        
+        
+        svg.selectAll("myRect")
+            .data(buildings)
+            .enter()
+            .append("rect")
+            .attr("x", 170)
+            .attr("y", (d,i) => i * 50)
+            .attr("width", (d,i) => d.height_px)
+            .attr("height", 40)
+            .attr("fill", "cornflowerblue")
+            .on("click", (event,d) => {document.querySelector(".image").src = "img/" + d.image;
+            d3.select(".building-name").text(d.building)
+            d3.select(".country").text(d.country)
+            d3.select(".city").text(d.city)
+            d3.select(".heightft").text(d.height_ft)
+            d3.select(".heightm").text(d.height_m)
+            d3.select(".floors").text(d.floors)
+            d3.select(".completed").text(d.completed)
+
+            });
+
+        svg.selectAll("text.building")
+            .data(buildings)
+            .enter()
+            .append("text")
+            .attr("x", 160)
+            .attr("y", (d,i) => i * 50)
+            .text((d) => d.building)
+            .attr("text-anchor", "end")
+            .attr("font-size", "11px")
+            .attr("dy", 24)
+        
+        svg.selectAll("text.height")
+            .data(buildings)
+            .enter()
+            .append("text")
+            .attr("x", (d,i) => d.height_px + 185)
+            .attr("y", (d,i) => i * 50)
+            .text((d) => d.height_ft + "feet")
+            .attr("text-anchor", "start")
+            .attr("font-size", "11px")
+            .attr("dy", 24);
+    
+    })
+        
+
+
+    </script>
+
+    
+
+</body>
+</html>
